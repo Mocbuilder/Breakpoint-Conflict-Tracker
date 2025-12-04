@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BreakpointConflictTracker")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+26b94e60422006fc3fdb2285ded4539a4a1268a0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+17c2cc12b1be4bc5dcc04fe26d04f061a51680ae")]
 [assembly: System.Reflection.AssemblyProductAttribute("BreakpointConflictTracker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BreakpointConflictTracker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

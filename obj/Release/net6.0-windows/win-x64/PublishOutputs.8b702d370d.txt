@@ -1,0 +1,7 @@
+C:\Users\xshiz\OneDrive\Desktop\breakpoint-conflict-tracker\test-publish\BreakpointConflictTracker.pdb
+C:\Users\xshiz\OneDrive\Desktop\breakpoint-conflict-tracker\test-publish\D3DCompiler_47_cor3.dll
+C:\Users\xshiz\OneDrive\Desktop\breakpoint-conflict-tracker\test-publish\PenImc_cor3.dll
+C:\Users\xshiz\OneDrive\Desktop\breakpoint-conflict-tracker\test-publish\PresentationNative_cor3.dll
+C:\Users\xshiz\OneDrive\Desktop\breakpoint-conflict-tracker\test-publish\vcruntime140_cor3.dll
+C:\Users\xshiz\OneDrive\Desktop\breakpoint-conflict-tracker\test-publish\wpfgfx_cor3.dll
+C:\Users\xshiz\OneDrive\Desktop\breakpoint-conflict-tracker\test-publish\BreakpointConflictTracker.exe
