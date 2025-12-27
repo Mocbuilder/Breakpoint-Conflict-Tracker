@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- All Items would be listed here, we could probably also automate an import from the csv to this xml structure, or just directly from your already typed-up array -->
+<Items>
+	<Item type="Camo" name="Multicam"/>
+	<Item type="Tops" name="Fixit's Shirt"/>
+</Items>
+	

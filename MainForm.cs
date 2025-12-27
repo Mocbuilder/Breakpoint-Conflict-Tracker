@@ -168,7 +168,10 @@ private void ExportMenuItem_Click(object? sender, EventArgs e)
 
                 foreach (var item in listBox.Items)
                 {
-                    string itemText = item.ToString();
+                    string? itemText = item.ToString();
+                    if (itemText is null)
+                        return;
+
                     // Parse the item text to extract mod name, category, and item
                     string[] parts = itemText.Split(new[] { " -> " }, StringSplitOptions.None);
                     string modName = parts.Length > 0 ? parts[0].Trim() : string.Empty;
@@ -214,7 +217,7 @@ private void ExportMenuItem_Click(object? sender, EventArgs e)
                     listBox.Items.Clear();
                     using (StreamReader reader = new StreamReader(openFileDialog.FileName))
                     {
-                        string line;
+                        string? line;
                         while ((line = reader.ReadLine()) != null)
                         {
                             listBox.Items.Add(line);
@@ -297,7 +300,7 @@ private void ExportMenuItem_Click(object? sender, EventArgs e)
             Brush textBrush = isAdded ? Brushes.Red : Brushes.Black;
 
             // Draw the text
-            e.Graphics.DrawString(itemText, e.Font, textBrush, e.Bounds, StringFormat.GenericDefault);
+            e.Graphics.DrawString(itemText, e.Font ?? SystemFonts.DefaultFont, textBrush, e.Bounds, StringFormat.GenericDefault);
 
             // Draw focus rectangle if needed
             e.DrawFocusRectangle();
