@@ -22,6 +22,7 @@ namespace BreakpointConflictTracker
 
         public MainForm()
         {
+            //Do all this first, so that the subsequent methods can use this
             Text = "Breakpoint Conflict Tracker";
             Size = new Size(600, 400);
             xmlHelper = new XMLHelper("items.xml");
@@ -159,18 +160,34 @@ namespace BreakpointConflictTracker
             Controls.Add(menuStrip);
         }
 
-private void ExportMenuItem_Click(object? sender, EventArgs e)
-{
-    SaveFileDialog saveFileDialog = new SaveFileDialog();
-    saveFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*|CSV files (*.csv)|*.csv";
-    saveFileDialog.Title = "Export Conflict List";
-    saveFileDialog.DefaultExt = "csv";
-
-    if (saveFileDialog.ShowDialog() == DialogResult.OK)
-    {
-        try
+        private void ExportMenuItem_Click(object? sender, EventArgs e)
         {
-            using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*|CSV files (*.csv)|*.csv";
+            saveFileDialog.Title = "Export Conflict List";
+            saveFileDialog.DefaultExt = "csv";
+
+            //Made this a guard clause to reduce nesting
+            if (saveFileDialog.ShowDialog() != DialogResult.OK) 
+            {
+                MessageBox.Show("Export cancelled.", "Export Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                //Moved the actual saving logic into its own method for clarity
+                SaveConflictListToCSV(saveFileDialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error exporting conflict list: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void SaveConflictListToCSV(string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
             {
                 // Write CSV header
                 writer.WriteLine("Mod Name,Category,Category Item,Description");
@@ -179,39 +196,46 @@ private void ExportMenuItem_Click(object? sender, EventArgs e)
                 {
                     string? itemText = item.ToString();
                     if (itemText is null)
-                        return;
+                        throw new Exception("One of the items in the list box is null.");
 
-                    // Parse the item text to extract mod name, category, and item
-                    string[] parts = itemText.Split(new[] { " -> " }, StringSplitOptions.None);
-                    string modName = parts.Length > 0 ? parts[0].Trim() : string.Empty;
-                    string categoryItemPart = parts.Length > 1 ? parts[1] : string.Empty;
-
-                    string[] categoryParts = categoryItemPart.Split(new[] { ": " }, StringSplitOptions.None);
-                    string category = categoryParts.Length > 0 ? categoryParts[0].Trim() : string.Empty;
-                    string itemName = categoryParts.Length > 1 ? categoryParts[1].Trim() : string.Empty;
-
-                    // Extract description if present
-                    string description = string.Empty;
-                    if (itemName.Contains("(") && itemName.Contains(")"))
-                    {
-                        string[] descParts = itemName.Split(new[] { "(" }, StringSplitOptions.None);
-                        itemName = descParts[0].Trim();
-                        description = descParts.Length > 1 ? descParts[1].Replace(")", "").Trim() : string.Empty;
-                    }
+                    //Moved this logic into its own method too. I didnt change it tho, if it aint broke dont fix it
+                    ConflictItem conflictItem = ParseItemTextToConflictItem(itemText);
 
                     // Write CSV line
-                    writer.WriteLine($"{modName},{category},{itemName},{description}");
+                    writer.WriteLine($"{conflictItem.ModName},{conflictItem.Category},{conflictItem.ItemName},{conflictItem.Description}");
                 }
             }
             MessageBox.Show("Conflict list exported successfully!", "Export Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Error exporting conflict list: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-    }
-}
 
+        public ConflictItem ParseItemTextToConflictItem(string itemText)
+        {
+            // Parse the item text to extract mod name, category, and item
+            string[] parts = itemText.Split(new[] { " -> " }, StringSplitOptions.None);
+            string modName = parts.Length > 0 ? parts[0].Trim() : string.Empty;
+            string categoryItemPart = parts.Length > 1 ? parts[1] : string.Empty;
+
+            string[] categoryParts = categoryItemPart.Split(new[] { ": " }, StringSplitOptions.None);
+            string category = categoryParts.Length > 0 ? categoryParts[0].Trim() : string.Empty;
+            string itemName = categoryParts.Length > 1 ? categoryParts[1].Trim() : string.Empty;
+
+            // Extract description if present
+            string description = string.Empty;
+            if (itemName.Contains("(") && itemName.Contains(")"))
+            {
+                string[] descParts = itemName.Split(new[] { "(" }, StringSplitOptions.None);
+                itemName = descParts[0].Trim();
+                description = descParts.Length > 1 ? descParts[1].Replace(")", "").Trim() : string.Empty;
+            }
+
+            return new ConflictItem
+            {
+                ModName = modName,
+                Category = category,
+                ItemName = itemName,
+                Description = description
+            };
+        }
 
         private void ImportMenuItem_Click(object? sender, EventArgs e)
         {
@@ -250,13 +274,6 @@ private void ExportMenuItem_Click(object? sender, EventArgs e)
             }
 
             UpdateVanillaItemsComboBox(itemType);
-        }
-
-        private void UpdateVanillaItemsComboBox(ItemType selectedCategory)
-        {
-            vanillaItemComboBox.DataSource = null;
-            vanillaItemComboBox.DisplayMember = "Name";
-            vanillaItemComboBox.DataSource = xmlHelper._itemsCache.Where(item => item.Type == selectedCategory).ToList();
         }
 
         private void AddButton_Click(object? sender, EventArgs e)
@@ -335,6 +352,13 @@ private void ExportMenuItem_Click(object? sender, EventArgs e)
                 }
             }
             return false;
+        }
+
+        private void UpdateVanillaItemsComboBox(ItemType selectedCategory)
+        {
+            vanillaItemComboBox.DataSource = null;
+            vanillaItemComboBox.DisplayMember = "Name";
+            vanillaItemComboBox.DataSource = xmlHelper._itemsCache.Where(item => item.Type == selectedCategory).ToList();
         }
     }
 }
