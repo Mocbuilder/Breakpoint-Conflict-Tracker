@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using BreakpointConflictTracker.Models;
 
 namespace BreakpointConflictTracker
 {
@@ -17,6 +18,7 @@ namespace BreakpointConflictTracker
         private ListBox listBox = new ListBox();
         private Button removeButton = new Button();
         private MenuStrip menuStrip = new MenuStrip();
+        private XMLHelper xmlHelper;
 
         public MainForm()
         {
@@ -24,6 +26,7 @@ namespace BreakpointConflictTracker
             SetupUI();
             Text = "Breakpoint Conflict Tracker";
             Size = new Size(600, 400);
+            xmlHelper = new XMLHelper("");
             SetupMenu();
         }
 
@@ -49,6 +52,8 @@ namespace BreakpointConflictTracker
                 ["Backpack"] = new List<string> { "3 Day Assault Pack", "5.11 All Hazard Backpack", "5.11 AMP 24 Backpack", "5.11 RUSH24 Backpack", "Airtight Pack", "Armored Pack", "BLACKHAWK Cyclone Pack", "BLACKHAWK Cyane With Tarp", "Blackhawk Cyane Pack", "Camelbak Ambush", "Camelbak Ambush - Open", "Crye AVS1000 Pack", "DA Dragon Egg MKII Pack", "Fixit's Pack", "Flycatcher Backpack", "Fury Crye AVS", "Hill's Backpack", "Maritime Operations Pack", "Nomad's AMP24", "Tac Tailor Hydration Pack", "Tac Tailor Operator Pack", "US Govornment Molle II Rucksack", "Versatile Pack", "Veshmeshok" }.OrderBy(x => x).ToList(),
                 ["Sunglasses"] = new List<string> { "5.11 Burner Sunglasses", "ACH Goggles", "Aviator Goggles", "Aviators", "Azure Glasses", "BCG", "Ballistic Goggles", "Downcurve Sunglasses", "ESS Crossbow Eyeshield", "Eye Patch", "Goggles ACH - Cross-Com", "High-Protection Shades", "John Kozak's Glasses", "Lara Croft's Sunglasses", "Oakley jawbreaker", "Oakley jawbreaker - Cross-Com", "Oakley SI Ballistic Halo Goggles", "Oakley Oakley SI Ballistic M-Frame 2.0", "Oakley Oakley SI Ballistic M-Frame Alpha", "Ops-Core Mk1 Glasses", "Pulse's Glasses", "Red Eye Terminator Sunglasses", "Revision BulletAnt Goggles", "Reision Exoshield Goggles", "Revision Hellfly", "Revision SnowHawk Ballistic Goggles", "Round Glasses", "Sarah Connor Sunglasses", "Scuba Mask", "Sentinel Goggles", "Skell Glasses", "Soviet Military Goggles", "Terminator Sunglasses" }.OrderBy(x => x).ToList()
             };
+
+            xmlHelper.LoadItems();
         }
 
         private void SetupUI()
