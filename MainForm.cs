@@ -242,26 +242,30 @@ namespace BreakpointConflictTracker
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
             openFileDialog.Title = "Import Conflict List";
-            
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
+
+            //Made this a guard clause to reduce nesting
+            if (openFileDialog.ShowDialog() != DialogResult.OK)
             {
-                try
+                MessageBox.Show("Export cancelled.", "Export Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                listBox.Items.Clear();
+                using (StreamReader reader = new StreamReader(openFileDialog.FileName))
                 {
-                    listBox.Items.Clear();
-                    using (StreamReader reader = new StreamReader(openFileDialog.FileName))
+                    string? line;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        string? line;
-                        while ((line = reader.ReadLine()) != null)
-                        {
-                            listBox.Items.Add(line);
-                        }
+                        listBox.Items.Add(line);
                     }
-                    MessageBox.Show("Conflict list imported successfully!", "Import Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error importing conflict list: {ex.Message}", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                MessageBox.Show("Conflict list imported successfully!", "Import Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error importing conflict list: {ex.Message}", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
