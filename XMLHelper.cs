@@ -48,7 +48,7 @@ namespace BreakpointConflictTracker
 
                 foreach (XmlNode userNode in itemNodes)
                 {
-                    string? type = userNode.Attributes?["name"]?.Value;
+                    string? type = userNode.Attributes?["type"]?.Value;
                     string? name = userNode.Attributes?["name"]?.Value;
 
                     if (string.IsNullOrEmpty(type) || string.IsNullOrEmpty(name))
@@ -56,7 +56,7 @@ namespace BreakpointConflictTracker
                         throw new Exception("Item node is missing required attributes.");
                     }
 
-                    Item newItem = new Item(Enum.Parse<ItemType>("Weapon"), name);
+                    Item newItem = new Item(Enum.Parse<ItemType>(type), name);
                     _itemsCache.Add(newItem);
                 }
 

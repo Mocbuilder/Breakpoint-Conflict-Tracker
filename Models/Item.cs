@@ -16,5 +16,10 @@ namespace BreakpointConflictTracker.Models
             Type = type;
             Name = name;
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

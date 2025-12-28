@@ -22,11 +22,11 @@ namespace BreakpointConflictTracker
 
         public MainForm()
         {
-            LoadData();
-            SetupUI();
             Text = "Breakpoint Conflict Tracker";
             Size = new Size(600, 400);
-            xmlHelper = new XMLHelper("");
+            xmlHelper = new XMLHelper("items.xml");
+            LoadData();
+            SetupUI();
             SetupMenu();
         }
 
@@ -87,7 +87,7 @@ namespace BreakpointConflictTracker
 
             categoryComboBox = new ComboBox();
             categoryComboBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            categoryComboBox.Items.AddRange(categoryItems.Keys.ToArray());
+            categoryComboBox.DataSource = Enum.GetValues(typeof(ItemType));
             categoryComboBox.SelectedIndexChanged += CategoryComboBox_SelectedIndexChanged;
             tableLayout.Controls.Add(categoryComboBox, 1, 1);
 
@@ -99,6 +99,7 @@ namespace BreakpointConflictTracker
             vanillaItemComboBox = new ComboBox();
             vanillaItemComboBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             vanillaItemComboBox.DrawMode = DrawMode.OwnerDrawFixed;
+            vanillaItemComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             vanillaItemComboBox.DrawItem += VanillaItemComboBox_DrawItem;
             tableLayout.Controls.Add(vanillaItemComboBox, 1, 2);
 
@@ -132,6 +133,9 @@ namespace BreakpointConflictTracker
             tableLayout.Controls.Add(removeButton, 1, 4);
 
             Controls.Add(tableLayout);
+
+            //Trigger this so that the vanilla items are in their combobox on startup, otherwise it's empty until a category is changed
+            UpdateVanillaItemsComboBox(ItemType.Camo);
         }
 
         private void SetupMenu()
@@ -239,12 +243,20 @@ private void ExportMenuItem_Click(object? sender, EventArgs e)
 
         private void CategoryComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            string? selectedCategory = categoryComboBox.SelectedItem?.ToString();
-            if (selectedCategory != null && categoryItems.ContainsKey(selectedCategory))
+            if (categoryComboBox.SelectedItem is not ItemType itemType)
             {
-                vanillaItemComboBox.Items.Clear();
-                vanillaItemComboBox.Items.AddRange(categoryItems[selectedCategory].ToArray());
+                MessageBox.Show("Invalid category selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
+
+            UpdateVanillaItemsComboBox(itemType);
+        }
+
+        private void UpdateVanillaItemsComboBox(ItemType selectedCategory)
+        {
+            vanillaItemComboBox.DataSource = null;
+            vanillaItemComboBox.DisplayMember = "Name";
+            vanillaItemComboBox.DataSource = xmlHelper._itemsCache.Where(item => item.Type == selectedCategory).ToList();
         }
 
         private void AddButton_Click(object? sender, EventArgs e)
