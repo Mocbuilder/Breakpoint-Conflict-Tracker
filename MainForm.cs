@@ -61,6 +61,13 @@ namespace BreakpointConflictTracker
             xmlHelper.LoadItems();
         }
 
+        private void UpdateVanillaItemsComboBox(ItemType selectedCategory)
+        {
+            vanillaItemComboBox.DataSource = null;
+            vanillaItemComboBox.DisplayMember = "Name";
+            vanillaItemComboBox.DataSource = xmlHelper._itemsCache.Where(item => item.Type == selectedCategory).ToList();
+        }
+
         private void CategoryComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (categoryComboBox.SelectedItem is not ItemType itemType)
@@ -72,11 +79,70 @@ namespace BreakpointConflictTracker
             UpdateVanillaItemsComboBox(itemType);
         }
 
-        private void UpdateVanillaItemsComboBox(ItemType selectedCategory)
+        private bool IsItemAlreadyAdded(string vanillaItem)
         {
-            //vanillaItemComboBox.DataSource = null;
-            //vanillaItemComboBox.DisplayMember = "Name";
-            //vanillaItemComboBox.DataSource = xmlHelper._itemsCache.Where(item => item.Type == selectedCategory).ToList();
+            // Check if the vanilla item exists in the list box
+            foreach (var item in listBox.Items)
+            {
+                string? itemText = item?.ToString();
+                if (!string.IsNullOrEmpty(itemText) && itemText.Contains($": {vanillaItem}"))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void SaveConflictListToCSV(string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                // Write CSV header
+                writer.WriteLine("Mod Name,Category,Category Item,Description");
+
+                foreach (var item in listBox.Items)
+                {
+                    string? itemText = item.ToString();
+                    if (itemText is null)
+                        throw new Exception("One of the items in the list box is null.");
+
+                    //Moved this logic into its own method too. I didnt change it tho, if it aint broke dont fix it
+                    ConflictItem conflictItem = ParseItemTextToConflictItem(itemText);
+
+                    // Write CSV line
+                    writer.WriteLine($"{conflictItem.ModName},{conflictItem.Category},{conflictItem.ItemName},{conflictItem.Description}");
+                }
+            }
+            MessageBox.Show("Conflict list exported successfully!", "Export Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        public ConflictItem ParseItemTextToConflictItem(string itemText)
+        {
+            // Parse the item text to extract mod name, category, and item
+            string[] parts = itemText.Split(new[] { " -> " }, StringSplitOptions.None);
+            string modName = parts.Length > 0 ? parts[0].Trim() : string.Empty;
+            string categoryItemPart = parts.Length > 1 ? parts[1] : string.Empty;
+
+            string[] categoryParts = categoryItemPart.Split(new[] { ": " }, StringSplitOptions.None);
+            string category = categoryParts.Length > 0 ? categoryParts[0].Trim() : string.Empty;
+            string itemName = categoryParts.Length > 1 ? categoryParts[1].Trim() : string.Empty;
+
+            // Extract description if present
+            string description = string.Empty;
+            if (itemName.Contains("(") && itemName.Contains(")"))
+            {
+                string[] descParts = itemName.Split(new[] { "(" }, StringSplitOptions.None);
+                itemName = descParts[0].Trim();
+                description = descParts.Length > 1 ? descParts[1].Replace(")", "").Trim() : string.Empty;
+            }
+
+            return new ConflictItem
+            {
+                ModName = modName,
+                Category = category,
+                ItemName = itemName,
+                Description = description
+            };
         }
 
         private void VanillaItemComboBox_DrawItem(object sender, DrawItemEventArgs e)
@@ -100,20 +166,6 @@ namespace BreakpointConflictTracker
 
             // Draw focus rectangle if needed
             e.DrawFocusRectangle();
-        }
-
-        private bool IsItemAlreadyAdded(string vanillaItem)
-        {
-            // Check if the vanilla item exists in the list box
-            foreach (var item in listBox.Items)
-            {
-                string? itemText = item?.ToString();
-                if (!string.IsNullOrEmpty(itemText) && itemText.Contains($": {vanillaItem}"))
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private void AddButton_Click(object sender, EventArgs e)
@@ -172,58 +224,6 @@ namespace BreakpointConflictTracker
             {
                 MessageBox.Show($"Error exporting conflict list: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        public void SaveConflictListToCSV(string filePath)
-        {
-            using (StreamWriter writer = new StreamWriter(filePath))
-            {
-                // Write CSV header
-                writer.WriteLine("Mod Name,Category,Category Item,Description");
-
-                foreach (var item in listBox.Items)
-                {
-                    string? itemText = item.ToString();
-                    if (itemText is null)
-                        throw new Exception("One of the items in the list box is null.");
-
-                    //Moved this logic into its own method too. I didnt change it tho, if it aint broke dont fix it
-                    ConflictItem conflictItem = ParseItemTextToConflictItem(itemText);
-
-                    // Write CSV line
-                    writer.WriteLine($"{conflictItem.ModName},{conflictItem.Category},{conflictItem.ItemName},{conflictItem.Description}");
-                }
-            }
-            MessageBox.Show("Conflict list exported successfully!", "Export Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        public ConflictItem ParseItemTextToConflictItem(string itemText)
-        {
-            // Parse the item text to extract mod name, category, and item
-            string[] parts = itemText.Split(new[] { " -> " }, StringSplitOptions.None);
-            string modName = parts.Length > 0 ? parts[0].Trim() : string.Empty;
-            string categoryItemPart = parts.Length > 1 ? parts[1] : string.Empty;
-
-            string[] categoryParts = categoryItemPart.Split(new[] { ": " }, StringSplitOptions.None);
-            string category = categoryParts.Length > 0 ? categoryParts[0].Trim() : string.Empty;
-            string itemName = categoryParts.Length > 1 ? categoryParts[1].Trim() : string.Empty;
-
-            // Extract description if present
-            string description = string.Empty;
-            if (itemName.Contains("(") && itemName.Contains(")"))
-            {
-                string[] descParts = itemName.Split(new[] { "(" }, StringSplitOptions.None);
-                itemName = descParts[0].Trim();
-                description = descParts.Length > 1 ? descParts[1].Replace(")", "").Trim() : string.Empty;
-            }
-
-            return new ConflictItem
-            {
-                ModName = modName,
-                Category = category,
-                ItemName = itemName,
-                Description = description
-            };
         }
 
         private void ImportMenuItem_Click(object? sender, EventArgs e)
