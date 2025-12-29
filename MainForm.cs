@@ -1,34 +1,38 @@
+﻿using BreakpointConflictTracker.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using BreakpointConflictTracker.Models;
 
 namespace BreakpointConflictTracker
 {
     public partial class MainForm : Form
     {
         private Dictionary<string, List<string>> categoryItems = new Dictionary<string, List<string>>();
-        private TextBox modNameTextBox = new TextBox();
-        private ComboBox categoryComboBox = new ComboBox();
-        private ComboBox vanillaItemComboBox = new ComboBox();
-        private TextBox descriptionTextBox = new TextBox();
-        private Button addButton = new Button();
-        private ListBox listBox = new ListBox();
-        private Button removeButton = new Button();
-        private MenuStrip menuStrip = new MenuStrip();
+
         private XMLHelper xmlHelper;
 
         public MainForm()
         {
-            //Do all this first, so that the subsequent methods can use this
-            Text = "Breakpoint Conflict Tracker";
-            Size = new Size(600, 400);
+            InitializeComponent();
             xmlHelper = new XMLHelper("items.xml");
+
             LoadData();
-            SetupUI();
-            SetupMenu();
+            LoadUI();
+        }
+
+        public void LoadUI()
+        {
+            listBox.ContextMenuStrip = new ContextMenuStrip();
+            listBox.ContextMenuStrip.Items.Add("Remove").Click += RemoveMenuItem_Click;
+
+            //Trigger this so that the vanilla items are in their combobox on startup, otherwise it's empty until a category is changed
+            UpdateVanillaItemsComboBox(ItemType.Camo);
         }
 
         private void LoadData()
@@ -57,107 +61,92 @@ namespace BreakpointConflictTracker
             xmlHelper.LoadItems();
         }
 
-        private void SetupUI()
+        private void CategoryComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            TableLayoutPanel tableLayout = new TableLayoutPanel();
-            tableLayout.Dock = DockStyle.Fill;
-            tableLayout.ColumnCount = 2;
-            tableLayout.RowCount = 6;
-            tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30));
-            tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70));
-            tableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-            tableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-            tableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-            tableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60));
-            tableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-            tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            if (categoryComboBox.SelectedItem is not ItemType itemType)
+            {
+                MessageBox.Show("Invalid category selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            Label modNameLabel = new Label();
-            modNameLabel.Text = "Mod Name:";
-            modNameLabel.Anchor = AnchorStyles.Right;
-            tableLayout.Controls.Add(modNameLabel, 0, 0);
-
-            modNameTextBox = new TextBox();
-            modNameTextBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            tableLayout.Controls.Add(modNameTextBox, 1, 0);
-
-            Label categoryLabel = new Label();
-            categoryLabel.Text = "Category:";
-            categoryLabel.Anchor = AnchorStyles.Right;
-            tableLayout.Controls.Add(categoryLabel, 0, 1);
-
-            categoryComboBox = new ComboBox();
-            categoryComboBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            categoryComboBox.DataSource = Enum.GetValues(typeof(ItemType));
-            categoryComboBox.SelectedIndexChanged += CategoryComboBox_SelectedIndexChanged;
-            tableLayout.Controls.Add(categoryComboBox, 1, 1);
-
-            Label vanillaItemLabel = new Label();
-            vanillaItemLabel.Text = "Vanilla Item:";
-            vanillaItemLabel.Anchor = AnchorStyles.Right;
-            tableLayout.Controls.Add(vanillaItemLabel, 0, 2);
-
-            vanillaItemComboBox = new ComboBox();
-            vanillaItemComboBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            vanillaItemComboBox.DrawMode = DrawMode.OwnerDrawFixed;
-            vanillaItemComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            vanillaItemComboBox.DrawItem += VanillaItemComboBox_DrawItem;
-            tableLayout.Controls.Add(vanillaItemComboBox, 1, 2);
-
-            Label descriptionLabel = new Label();
-            descriptionLabel.Text = "Description (optional):";
-            descriptionLabel.Anchor = AnchorStyles.Right;
-            tableLayout.Controls.Add(descriptionLabel, 0, 3);
-
-            descriptionTextBox = new TextBox();
-            descriptionTextBox.Multiline = true;
-            descriptionTextBox.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
-            tableLayout.Controls.Add(descriptionTextBox, 1, 3);
-
-            addButton = new Button();
-            addButton.Text = "Add to List";
-            addButton.Anchor = AnchorStyles.Left;
-            addButton.Click += AddButton_Click;
-            tableLayout.Controls.Add(addButton, 1, 4);
-
-            listBox = new ListBox();
-            listBox.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
-            listBox.ContextMenuStrip = new ContextMenuStrip();
-            listBox.ContextMenuStrip.Items.Add("Remove").Click += RemoveMenuItem_Click;
-            tableLayout.Controls.Add(listBox, 0, 5);
-            tableLayout.SetColumnSpan(listBox, 2);
-
-            removeButton = new Button();
-            removeButton.Text = "Remove from List";
-            removeButton.Anchor = AnchorStyles.Left;
-            removeButton.Click += RemoveButton_Click;
-            tableLayout.Controls.Add(removeButton, 1, 4);
-
-            Controls.Add(tableLayout);
-
-            //Trigger this so that the vanilla items are in their combobox on startup, otherwise it's empty until a category is changed
-            UpdateVanillaItemsComboBox(ItemType.Camo);
+            UpdateVanillaItemsComboBox(itemType);
         }
 
-        private void SetupMenu()
+        private void UpdateVanillaItemsComboBox(ItemType selectedCategory)
         {
-            // Create File menu
-            ToolStripMenuItem fileMenu = new ToolStripMenuItem("File");
-            
-            // Create Export option
-            ToolStripMenuItem exportMenuItem = new ToolStripMenuItem("Export Conflict List");
-            exportMenuItem.Click += ExportMenuItem_Click;
-            fileMenu.DropDownItems.Add(exportMenuItem);
-            
-            // Create Import option
-            ToolStripMenuItem importMenuItem = new ToolStripMenuItem("Import Conflict List");
-            importMenuItem.Click += ImportMenuItem_Click;
-            fileMenu.DropDownItems.Add(importMenuItem);
-            
-            // Add File menu to menu strip
-            menuStrip.Items.Add(fileMenu);
-            MainMenuStrip = menuStrip;
-            Controls.Add(menuStrip);
+            //vanillaItemComboBox.DataSource = null;
+            //vanillaItemComboBox.DisplayMember = "Name";
+            //vanillaItemComboBox.DataSource = xmlHelper._itemsCache.Where(item => item.Type == selectedCategory).ToList();
+        }
+
+        private void VanillaItemComboBox_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+
+            string? itemText = vanillaItemComboBox.Items[e.Index]?.ToString();
+            if (string.IsNullOrEmpty(itemText)) return;
+
+            // Check if this item has been added to the list
+            bool isAdded = IsItemAlreadyAdded(itemText);
+
+            // Set the background color
+            e.DrawBackground();
+
+            // Set the text color based on whether it's been added
+            Brush textBrush = isAdded ? Brushes.Red : Brushes.Black;
+
+            // Draw the text
+            e.Graphics.DrawString(itemText, e.Font ?? SystemFonts.DefaultFont, textBrush, e.Bounds, StringFormat.GenericDefault);
+
+            // Draw focus rectangle if needed
+            e.DrawFocusRectangle();
+        }
+
+        private bool IsItemAlreadyAdded(string vanillaItem)
+        {
+            // Check if the vanilla item exists in the list box
+            foreach (var item in listBox.Items)
+            {
+                string? itemText = item?.ToString();
+                if (!string.IsNullOrEmpty(itemText) && itemText.Contains($": {vanillaItem}"))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void AddButton_Click(object sender, EventArgs e)
+        {
+            string modName = modNameTextBox.Text.Trim();
+            string? category = categoryComboBox.SelectedItem?.ToString();
+            string? vanillaItem = vanillaItemComboBox.SelectedItem?.ToString();
+            string description = descriptionTextBox.Text.Trim();
+
+            if (string.IsNullOrEmpty(modName) || string.IsNullOrEmpty(category) || string.IsNullOrEmpty(vanillaItem))
+            {
+                MessageBox.Show("Mod Name, Category, and Vanilla Item are required.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            string itemText = $"{modName} -> {category}: {vanillaItem}";
+            if (!string.IsNullOrEmpty(description))
+            {
+                itemText += $" ({description})";
+            }
+
+            listBox.Items.Add(itemText);
+
+            modNameTextBox.Clear();
+            descriptionTextBox.Clear();
+        }
+
+        private void RemoveMenuItem_Click(object? sender, EventArgs e)
+        {
+            if (listBox.SelectedItem != null)
+            {
+                listBox.Items.Remove(listBox.SelectedItem);
+            }
         }
 
         private void ExportMenuItem_Click(object? sender, EventArgs e)
@@ -168,7 +157,7 @@ namespace BreakpointConflictTracker
             saveFileDialog.DefaultExt = "csv";
 
             //Made this a guard clause to reduce nesting
-            if (saveFileDialog.ShowDialog() != DialogResult.OK) 
+            if (saveFileDialog.ShowDialog() != DialogResult.OK)
             {
                 MessageBox.Show("Export cancelled.", "Export Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -267,102 +256,6 @@ namespace BreakpointConflictTracker
             {
                 MessageBox.Show($"Error importing conflict list: {ex.Message}", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void CategoryComboBox_SelectedIndexChanged(object? sender, EventArgs e)
-        {
-            if (categoryComboBox.SelectedItem is not ItemType itemType)
-            {
-                MessageBox.Show("Invalid category selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            UpdateVanillaItemsComboBox(itemType);
-        }
-
-        private void AddButton_Click(object? sender, EventArgs e)
-        {
-            string modName = modNameTextBox.Text.Trim();
-            string? category = categoryComboBox.SelectedItem?.ToString();
-            string? vanillaItem = vanillaItemComboBox.SelectedItem?.ToString();
-            string description = descriptionTextBox.Text.Trim();
-
-            if (string.IsNullOrEmpty(modName) || string.IsNullOrEmpty(category) || string.IsNullOrEmpty(vanillaItem))
-            {
-                MessageBox.Show("Mod Name, Category, and Vanilla Item are required.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            string itemText = $"{modName} -> {category}: {vanillaItem}";
-            if (!string.IsNullOrEmpty(description))
-            {
-                itemText += $" ({description})";
-            }
-
-            listBox.Items.Add(itemText);
-
-            modNameTextBox.Clear();
-            descriptionTextBox.Clear();
-        }
-
-        private void RemoveButton_Click(object? sender, EventArgs e)
-        {
-            if (listBox.SelectedItem != null)
-            {
-                listBox.Items.Remove(listBox.SelectedItem);
-            }
-        }
-
-        private void RemoveMenuItem_Click(object? sender, EventArgs e)
-        {
-            if (listBox.SelectedItem != null)
-            {
-                listBox.Items.Remove(listBox.SelectedItem);
-            }
-        }
-
-        private void VanillaItemComboBox_DrawItem(object? sender, DrawItemEventArgs e)
-        {
-            if (e.Index < 0) return;
-
-            string? itemText = vanillaItemComboBox.Items[e.Index]?.ToString();
-            if (string.IsNullOrEmpty(itemText)) return;
-
-            // Check if this item has been added to the list
-            bool isAdded = IsItemAlreadyAdded(itemText);
-
-            // Set the background color
-            e.DrawBackground();
-
-            // Set the text color based on whether it's been added
-            Brush textBrush = isAdded ? Brushes.Red : Brushes.Black;
-
-            // Draw the text
-            e.Graphics.DrawString(itemText, e.Font ?? SystemFonts.DefaultFont, textBrush, e.Bounds, StringFormat.GenericDefault);
-
-            // Draw focus rectangle if needed
-            e.DrawFocusRectangle();
-        }
-
-        private bool IsItemAlreadyAdded(string vanillaItem)
-        {
-            // Check if the vanilla item exists in the list box
-            foreach (var item in listBox.Items)
-            {
-                string? itemText = item?.ToString();
-                if (!string.IsNullOrEmpty(itemText) && itemText.Contains($": {vanillaItem}"))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private void UpdateVanillaItemsComboBox(ItemType selectedCategory)
-        {
-            vanillaItemComboBox.DataSource = null;
-            vanillaItemComboBox.DisplayMember = "Name";
-            vanillaItemComboBox.DataSource = xmlHelper._itemsCache.Where(item => item.Type == selectedCategory).ToList();
         }
     }
 }
