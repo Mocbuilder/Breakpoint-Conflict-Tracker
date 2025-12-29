@@ -19,8 +19,7 @@ namespace BreakpointConflictTracker
         {
             InitializeComponent();
             xmlHelper = new XMLHelper("items.xml");
-
-            LoadData();
+            xmlHelper.LoadItems();
             LoadUI();
         }
 
@@ -29,13 +28,10 @@ namespace BreakpointConflictTracker
             listBox.ContextMenuStrip = new ContextMenuStrip();
             listBox.ContextMenuStrip.Items.Add("Remove").Click += RemoveMenuItem_Click;
 
+            categoryComboBox.DataSource = Enum.GetValues(typeof(ItemType));
+
             //Trigger this so that the vanilla items are in their combobox on startup, otherwise it's empty until a category is changed
             UpdateVanillaItemsComboBox(ItemType.Camo);
-        }
-
-        private void LoadData()
-        {
-            xmlHelper.LoadItems();
         }
 
         private void UpdateVanillaItemsComboBox(ItemType selectedCategory)

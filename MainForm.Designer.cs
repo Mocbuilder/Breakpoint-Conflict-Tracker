@@ -68,11 +68,11 @@
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 4;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 70F));
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 70F));
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Size = new Size(778, 544);
             tableLayoutPanel1.TabIndex = 0;
@@ -81,7 +81,7 @@
             // 
             modNameLabel.Anchor = AnchorStyles.Right;
             modNameLabel.AutoSize = true;
-            modNameLabel.Location = new Point(124, 2);
+            modNameLabel.Location = new Point(124, 7);
             modNameLabel.Name = "modNameLabel";
             modNameLabel.Size = new Size(106, 25);
             modNameLabel.TabIndex = 0;
@@ -90,7 +90,8 @@
             // modNameTextBox
             // 
             modNameTextBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            modNameTextBox.Location = new Point(236, 3);
+            modNameTextBox.BorderStyle = BorderStyle.FixedSingle;
+            modNameTextBox.Location = new Point(236, 4);
             modNameTextBox.Name = "modNameTextBox";
             modNameTextBox.Size = new Size(539, 31);
             modNameTextBox.TabIndex = 1;
@@ -99,7 +100,7 @@
             // 
             categoryLabel.Anchor = AnchorStyles.Right;
             categoryLabel.AutoSize = true;
-            categoryLabel.Location = new Point(142, 32);
+            categoryLabel.Location = new Point(142, 47);
             categoryLabel.Name = "categoryLabel";
             categoryLabel.Size = new Size(88, 25);
             categoryLabel.TabIndex = 2;
@@ -109,7 +110,7 @@
             // 
             categoryComboBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             categoryComboBox.FormattingEnabled = true;
-            categoryComboBox.Location = new Point(236, 33);
+            categoryComboBox.Location = new Point(236, 43);
             categoryComboBox.Name = "categoryComboBox";
             categoryComboBox.Size = new Size(539, 33);
             categoryComboBox.TabIndex = 3;
@@ -119,7 +120,7 @@
             // 
             vanillaItemLabel.Anchor = AnchorStyles.Right;
             vanillaItemLabel.AutoSize = true;
-            vanillaItemLabel.Location = new Point(123, 62);
+            vanillaItemLabel.Location = new Point(123, 87);
             vanillaItemLabel.Name = "vanillaItemLabel";
             vanillaItemLabel.Size = new Size(107, 25);
             vanillaItemLabel.TabIndex = 4;
@@ -131,7 +132,7 @@
             vanillaItemComboBox.DrawMode = DrawMode.OwnerDrawFixed;
             vanillaItemComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             vanillaItemComboBox.FormattingEnabled = true;
-            vanillaItemComboBox.Location = new Point(236, 63);
+            vanillaItemComboBox.Location = new Point(236, 84);
             vanillaItemComboBox.Name = "vanillaItemComboBox";
             vanillaItemComboBox.Size = new Size(539, 32);
             vanillaItemComboBox.TabIndex = 5;
@@ -141,7 +142,7 @@
             // 
             descriptionLabel.Anchor = AnchorStyles.Right;
             descriptionLabel.AutoSize = true;
-            descriptionLabel.Location = new Point(43, 107);
+            descriptionLabel.Location = new Point(43, 142);
             descriptionLabel.Name = "descriptionLabel";
             descriptionLabel.Size = new Size(187, 25);
             descriptionLabel.TabIndex = 6;
@@ -150,16 +151,17 @@
             // descriptionTextBox
             // 
             descriptionTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            descriptionTextBox.Location = new Point(236, 93);
+            descriptionTextBox.BorderStyle = BorderStyle.FixedSingle;
+            descriptionTextBox.Location = new Point(236, 123);
             descriptionTextBox.Multiline = true;
             descriptionTextBox.Name = "descriptionTextBox";
-            descriptionTextBox.Size = new Size(539, 54);
+            descriptionTextBox.Size = new Size(539, 64);
             descriptionTextBox.TabIndex = 7;
             // 
             // addButton
             // 
             addButton.Anchor = AnchorStyles.Left;
-            addButton.Location = new Point(3, 161);
+            addButton.Location = new Point(3, 206);
             addButton.Name = "addButton";
             addButton.Size = new Size(112, 38);
             addButton.TabIndex = 8;
@@ -172,15 +174,15 @@
             listBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tableLayoutPanel1.SetColumnSpan(listBox, 2);
             listBox.FormattingEnabled = true;
-            listBox.Location = new Point(3, 213);
+            listBox.Location = new Point(3, 263);
             listBox.Name = "listBox";
-            listBox.Size = new Size(772, 304);
+            listBox.Size = new Size(772, 254);
             listBox.TabIndex = 9;
             // 
             // removeButton
             // 
             removeButton.Anchor = AnchorStyles.Left;
-            removeButton.Location = new Point(236, 160);
+            removeButton.Location = new Point(236, 205);
             removeButton.Name = "removeButton";
             removeButton.Size = new Size(176, 39);
             removeButton.TabIndex = 10;
